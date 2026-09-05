@@ -1,0 +1,28 @@
+# Ansible generated/runtime files
+*.retry
+*.log
+
+# Vault password files (never commit these)
+.vault_pass
+vault_pass.txt
+
+# Project-generated output (reports, results — not source)
+**/reports/
+
+# Python virtual environments
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor/IDE
+.vscode/
+.idea/
+
+# Certs and keys — never commit these
+*.pem
+*.key

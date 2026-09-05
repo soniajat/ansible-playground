@@ -1,0 +1,56 @@
+---
+- name: Server audit report - Linux
+  hosts: linux
+  gather_facts: true
+  tasks:
+    - name: Collect uptime
+      command: uptime
+      register: uptime_out
+      changed_when: false
+
+    - name: Collect disk usage
+      command: df -h
+      register: disk_out
+      changed_when: false
+
+    - name: Write Linux report
+      copy:
+        dest: "./reports/{{ inventory_hostname }}.txt"
+        content: |
+          Host: {{ inventory_hostname }}
+          OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
+          Kernel: {{ ansible_kernel }}
+          Memory: {{ ansible_memtotal_mb }} MB
+          CPUs: {{ ansible_processor_vcpus }}
+          Uptime: {{ uptime_out.stdout }}
+
+          Disk Usage:
+          {{ disk_out.stdout }}
+      delegate_to: localhost
+
+- name: Server audit report - Windows
+  hosts: windows
+  gather_facts: true
+  tasks:
+    - name: Collect system uptime
+      win_shell: (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
+      register: uptime_out
+      changed_when: false
+
+    - name: Collect disk usage
+      win_shell: Get-PSDrive -PSProvider FileSystem | Select-Object Name,Used,Free | Format-Table -AutoSize
+      register: disk_out
+      changed_when: false
+
+    - name: Write Windows report
+      copy:
+        dest: "./reports/{{ inventory_hostname }}.txt"
+        content: |
+          Host: {{ inventory_hostname }}
+          OS: {{ ansible_os_name | default('Windows') }}
+          Memory: {{ ansible_memtotal_mb | default('N/A') }} MB
+          Last Boot: {{ uptime_out.stdout }}
+
+          Disk Usage:
+          {{ disk_out.stdout }}
+      delegate_to: localhost
